@@ -29,7 +29,7 @@ resource "azurerm_storage_account" "sa" {
   resource_group_name     = local.rg_name
   location                = local.rg_location
   account_tier            = "Standard"
-  account_replication_type = "LRS"
+  account_replication_type = coalesce(var.storage_account_replication_type, "LRS")
   account_kind            = "StorageV2"
 
   # Secure defaults
@@ -38,4 +38,20 @@ resource "azurerm_storage_account" "sa" {
   public_network_access_enabled = var.public_network_access_enabled
 
   tags = var.tags
+
+  lifecycle {
+    # Avoid unnecessary replacements when importing existing accounts with different defaults
+    ignore_changes = [
+      access_tier,
+      large_file_share_enabled,
+      # provider-derived defaults or env settings
+      enable_https_traffic_only,
+      # nested blocks often not explicitly set here
+      blob_properties,
+      queue_properties,
+      share_properties,
+      routing,
+      static_website,
+    ]
+  }
 }

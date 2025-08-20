@@ -62,6 +62,19 @@ variable "enable_storage" {
   default     = true
 }
 
+variable "storage_account_replication_type" {
+  description = "Replication type for the storage account (e.g., LRS, GRS, RAGRS, ZRS, GZRS, RAGZRS). If null, defaults to LRS."
+  type        = string
+  default     = null
+  validation {
+    condition = (
+      var.storage_account_replication_type == null ||
+      contains(["LRS","GRS","RAGRS","ZRS","GZRS","RAGZRS"], var.storage_account_replication_type)
+    )
+    error_message = "storage_account_replication_type must be one of LRS, GRS, RAGRS, ZRS, GZRS, RAGZRS or null."
+  }
+}
+
 variable "tags" {
   description = "Common resource tags."
   type        = map(string)
