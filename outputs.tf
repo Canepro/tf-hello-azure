@@ -5,5 +5,5 @@ output "resource_group_id" {
 
 output "storage_account_id" {
   description = "ID of the Storage Account (created or existing)."
-  value       = var.create_storage_account ? azurerm_storage_account.sa[0].id : data.azurerm_storage_account.existing[0].id
+  value       = var.enable_storage ? (var.create_storage_account ? azurerm_storage_account.sa[0].id : data.azurerm_storage_account.existing[0].id) : null
 }

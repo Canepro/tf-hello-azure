@@ -13,16 +13,18 @@ resource "azurerm_resource_group" "rg" {
 locals {
   rg_name     = var.use_existing_resource_group ? data.azurerm_resource_group.existing[0].name : azurerm_resource_group.rg[0].name
   rg_location = var.use_existing_resource_group ? data.azurerm_resource_group.existing[0].location : azurerm_resource_group.rg[0].location
+  do_storage  = var.enable_storage
+  do_create_sa = var.enable_storage && var.create_storage_account
 }
 
 data "azurerm_storage_account" "existing" {
-  count               = var.create_storage_account ? 0 : 1
+  count               = local.do_storage && !var.create_storage_account ? 1 : 0
   name                = var.storage_account_name
   resource_group_name = local.rg_name
 }
 
 resource "azurerm_storage_account" "sa" {
-  count                   = var.create_storage_account ? 1 : 0
+  count                   = local.do_create_sa ? 1 : 0
   name                    = var.storage_account_name
   resource_group_name     = local.rg_name
   location                = local.rg_location

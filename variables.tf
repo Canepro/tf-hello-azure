@@ -17,8 +17,8 @@ variable "storage_account_name" {
   description = "Globally-unique storage account name (3-24 lowercase alphanumeric)."
   type        = string
   validation {
-    condition     = can(regex("^[a-z0-9]{3,24}$", var.storage_account_name))
-    error_message = "Storage account name must be 3-24 chars of lowercase letters and digits."
+  condition     = var.enable_storage ? can(regex("^[a-z0-9]{3,24}$", var.storage_account_name)) : true
+  error_message = "Storage account name must be 3-24 chars of lowercase letters and digits."
   }
 }
 
@@ -52,6 +52,12 @@ variable "existing_resource_group_name" {
 
 variable "create_storage_account" {
   description = "If false, skip creating the Storage Account (useful in restricted environments)."
+  type        = bool
+  default     = true
+}
+
+variable "enable_storage" {
+  description = "When false, skip all storage resources entirely (no create or lookup)."
   type        = bool
   default     = true
 }
