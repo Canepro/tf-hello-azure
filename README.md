@@ -1,14 +1,22 @@
+
+
 # Terraform: Azure Hello Cloud
+
+> ⚠️ **Note:** Public blob access is enabled for demo purposes only. Do not use this configuration in production environments
 
 Purpose
 This repo is a minimal, secure-by-default Terraform example that provisions:
+-
 - An Azure Resource Group
+
 - A Storage Account with secure settings
 
 It’s designed as an easy starting point for learning Infrastructure as Code (IaC) on Azure with Terraform while showing good practices like version pinning, tagging, linting, and optional remote state with locking.
 
 What it creates
+-
 - Resource Group
+
 - Storage Account with:
   - TLS 1.2 minimum
   - HTTPS-only
@@ -16,7 +24,9 @@ What it creates
   - Shared key access disabled by default (safer: use RBAC or SAS)
 
 Repo contents
+-
 - Terraform config: main.tf, variables.tf, outputs.tf, versions.tf
+
 - Optional remote state: backend.tf, backend.hcl.example
 - Examples: terraform.tfvars.example
 - CI: .github/workflows/terraform.yml (optional; plan on PR, manual apply)
@@ -25,35 +35,53 @@ Repo contents
 
 Quick start (local)
 Prerequisites:
+-
 - Terraform >= 1.5
+
 - Azure CLI
 - Logged in to Azure and selected your subscription:
+  
   ```bash
   az login
   az account set --subscription "<SUBSCRIPTION_ID_OR_NAME>"
   ```
 
-Steps:
-1) Clone and enter the repo
-   ```bash
-   git clone <your-repo-url>
-   cd <your-repo-folder>
+
+## Purpose
+
+This repo is a minimal, secure-by-default Terraform example that provisions:
+
+- An Azure Resource Group
+
+## What it creates
+
+- Resource Group
+
+## Repo contents
+
+- Terraform config: main.tf, variables.tf, outputs.tf, versions.tf
+
+## Quick start (local)
+
+**Prerequisites**
+
+- Terraform >= 1.5
    ```
 
-2) Set variables (optional)
-   ```bash
-   cp terraform.tfvars.example terraform.tfvars
-   # Edit terraform.tfvars to update names, location, and tags
-   ```
 
-3) Initialize and plan
-   ```bash
+1. Initialize and plan
+
+   
+  ```bash
    terraform init
    terraform plan
    ```
 
-4) Apply
-   ```bash
+
+1. Apply
+
+   
+  ```bash
    terraform apply -auto-approve
    ```
 
@@ -63,6 +91,7 @@ Optional: Remote state with Azure Storage (recommended for teams)
 Remote state stores Terraform state in an Azure Storage Account and enables locking to avoid team conflicts.
 
 A) Create a state resource group, storage account, and container (one time per environment)
+
 ```bash
 az group create -n rg-tfstate -l eastus
 
@@ -79,6 +108,7 @@ az storage container create \
 ```
 
 B) Fill the backend config (do not commit secrets)
+
 ```bash
 cp backend.hcl.example backend.hcl
 # Edit backend.hcl and set:
@@ -89,6 +119,7 @@ cp backend.hcl.example backend.hcl
 ```
 
 C) Re-init using backend config
+
 ```bash
 terraform init -reconfigure -backend-config=backend.hcl
 ```
@@ -97,11 +128,17 @@ From now on, Terraform uses remote state with locking.
 
 GitHub Actions CI (optional)
 This repo includes a workflow that:
+-
 - On pull requests: runs fmt, tflint, init, validate, and plan
+
 - On manual dispatch: applies changes safely (after manual approval)
 
 Before enabling, add these GitHub repository secrets:
+-
 - AZURE_CREDENTIALS: JSON output from:
+
+  
+  
   ```bash
   az ad sp create-for-rbac --name "tf-gha" --role Contributor \
     --scopes /subscriptions/<SUBSCRIPTION_ID> \
@@ -114,6 +151,7 @@ Before enabling, add these GitHub repository secrets:
 
 Inputs (variables)
 - resource_group_name (string, required): Name for the Resource Group
+
 - storage_account_name (string, required): 3–24 lowercase letters/digits; must be globally unique
 - location (string, default: eastus): Azure region (e.g., eastus, westeurope)
 - public_network_access_enabled (bool, default: true): Set to false if you plan to use Private Endpoints
@@ -122,16 +160,19 @@ Inputs (variables)
 
 Outputs
 - resource_group_id
+
 - storage_account_id
 
 Security defaults in this example
 - TLS 1.2 minimum for Storage Account
+
 - HTTPS-only enforced
 - Blob public access disabled
 - Shared key access disabled by default
 
 Tips and next steps
 - Commit the lock file after first init:
+
   ```bash
   git add .terraform.lock.hcl
   git commit -m "chore: lock provider checksums"

@@ -10,12 +10,12 @@ resource "azurerm_storage_account" "sa" {
   location                 = azurerm_resource_group.rg.location
   account_tier             = "Standard"
   account_replication_type = "LRS"
-  kind                     = "StorageV2"
+  account_kind             = "StorageV2"
 
   # Secure defaults
   min_tls_version               = "TLS1_2"
   enable_https_traffic_only     = true
-  allow_blob_public_access      = false
+  allow_blob_public_access      = true # Demo: public access enabled for showcase
   public_network_access_enabled = var.public_network_access_enabled
   allow_shared_key_access       = var.allow_shared_key_access
 
