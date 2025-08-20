@@ -1,0 +1,12 @@
+# Copy to terraform.tfvars and customize. Do NOT commit secrets here.
+resource_group_name            = "rg-hello"
+storage_account_name           = "hellostorage123"
+location                       = "eastus"
+public_network_access_enabled  = true
+allow_shared_key_access        = false
+
+tags = {
+  project     = "tf-hello-azure"
+  owner       = "you@example.com"
+  environment = "dev"
+}

@@ -1,17 +1,3 @@
-terraform {
-  required_version = ">= 1.5.0"
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~> 3.100"
-    }
-  }
-}
-
-provider "azurerm" {
-  features {}
-}
-
 resource "azurerm_resource_group" "rg" {
   name     = var.resource_group_name
   location = var.location
@@ -24,7 +10,12 @@ resource "azurerm_storage_account" "sa" {
   location                 = azurerm_resource_group.rg.location
   account_tier             = "Standard"
   account_replication_type = "LRS"
-  kind                     = "StorageV2"
-  min_tls_version          = "TLS1_2"
-  tags                     = var.tags
+  account_kind             = "StorageV2"
+
+  # Secure defaults
+  min_tls_version               = "TLS1_2"
+  enable_https_traffic_only     = true
+  public_network_access_enabled = var.public_network_access_enabled
+
+  tags = var.tags
 }

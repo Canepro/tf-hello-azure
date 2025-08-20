@@ -1,12 +1,23 @@
+# Local Terraform directories
 .terraform/
+.terraform.*
+
+# State files
 *.tfstate
 *.tfstate.*
-.terraform.lock.hcl
 crash.log
-*.tfvars
-*.tfvars.json
-override.tf
-override.tf.json
-*_override.tf
-*_override.tf.json
-.terragrunt-cache/
+crash.*.log
+
+# Plans
+*.plan
+tfplan
+
+# Sensitive or local-only files
+terraform.tfvars
+*.auto.tfvars
+backend.hcl
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+*.swp

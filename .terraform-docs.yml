@@ -1,0 +1,16 @@
+formatter: markdown table
+sections:
+  hide:
+    - providers
+    - modules
+    - resources
+    - data-sources
+sort:
+  enabled: true
+  by: name
+settings:
+  anchor: true
+  default: true
+  escape: true
+  hide-empty: true
+  required: true
