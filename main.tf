@@ -15,9 +15,7 @@ resource "azurerm_storage_account" "sa" {
   # Secure defaults
   min_tls_version               = "TLS1_2"
   enable_https_traffic_only     = true
-  allow_blob_public_access      = true # Demo: public access enabled for showcase
   public_network_access_enabled = var.public_network_access_enabled
-  allow_shared_key_access       = var.allow_shared_key_access
 
   tags = var.tags
 }
