@@ -20,6 +20,8 @@ A minimal, secure-by-default Terraform example for Azure. Provisions
   - HTTPS-only
   - Blob public access disabled
   - Shared key access disabled by default
+  - Optional static website
+  - Optional example blob container
 
 
 ## Prerequisites
@@ -64,6 +66,53 @@ A minimal, secure-by-default Terraform example for Azure. Provisions
   ```
 
   **Tip:** `storage_account_name` must be globally unique, 3–24 lowercase letters/digits.
+
+1. **Make a visible change (optional)**
+
+- Example container (works with an existing or new storage account):
+
+  ```bash
+  terraform plan \
+    -var="enable_storage=true" \
+    -var="create_storage_account=false" \
+    -var="storage_account_name=<existing-sa>" \
+    -var="use_existing_resource_group=true" \
+    -var="existing_resource_group_name=<your-rg>" \
+    -var="enable_example_container=true" \
+    -var="example_container_name=hello"
+
+  terraform apply -auto-approve \
+    -var="enable_storage=true" \
+    -var="create_storage_account=false" \
+    -var="storage_account_name=<existing-sa>" \
+    -var="use_existing_resource_group=true" \
+    -var="existing_resource_group_name=<your-rg>" \
+    -var="enable_example_container=true" \
+    -var="example_container_name=hello"
+  ```
+
+
+- Static website (only when Terraform creates the storage account):
+
+  ```bash
+  terraform plan \
+    -var="resource_group_name=my-tf-rg" \
+    -var="enable_storage=true" \
+    -var="create_storage_account=true" \
+    -var="storage_account_name=<unique-lowercase>" \
+    -var="enable_static_website=true" \
+    -var="static_website_index_document=index.html" \
+    -var="static_website_error_404_document=404.html"
+
+  terraform apply -auto-approve \
+    -var="resource_group_name=my-tf-rg" \
+    -var="enable_storage=true" \
+    -var="create_storage_account=true" \
+    -var="storage_account_name=<unique-lowercase>" \
+    -var="enable_static_website=true" \
+    -var="static_website_index_document=index.html" \
+    -var="static_website_error_404_document=404.html"
+  ```
 
 1. **Check your resources**
 
@@ -165,6 +214,14 @@ This repo includes a workflow that:
 - `enable_storage` (bool, default: true) — when false, no storage resources are created or looked up
 - `create_storage_account` (bool, default: true) — only used when `enable_storage` is true
 - `storage_account_name` (string, required when `enable_storage` is true; must match ^[a-z0-9]{3,24}$)
+- `storage_account_replication_type` (string, default: null; e.g., LRS/GRS/RAGRS/ZRS/GZRS/RAGZRS)
+- `storage_account_location` (string, default: null; when null, uses RG location)
+- `enable_static_website` (bool, default: false)
+- `static_website_index_document` (string, default: index.html)
+- `static_website_error_404_document` (string, default: 404.html)
+- `enable_example_container` (bool, default: false)
+- `example_container_name` (string, default: hello)
+- `example_container_access_type` (string, default: private)
 - `location` (string, default: eastus)
 - `public_network_access_enabled` (bool, default: true)
 - `allow_shared_key_access` (bool, default: false)
@@ -175,6 +232,7 @@ This repo includes a workflow that:
 
 - `resource_group_id`
 - `storage_account_id` (may be null when `enable_storage=false`)
+- `static_website_primary_endpoint` (null unless enabled and SA is managed by Terraform)
 
 
 ## Troubleshooting

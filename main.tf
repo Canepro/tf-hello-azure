@@ -37,6 +37,14 @@ resource "azurerm_storage_account" "sa" {
   https_traffic_only_enabled    = true
   public_network_access_enabled = var.public_network_access_enabled
 
+  dynamic "static_website" {
+    for_each = var.enable_static_website ? [1] : []
+    content {
+      index_document     = var.static_website_index_document
+      error_404_document = var.static_website_error_404_document
+    }
+  }
+
   tags = var.tags
 
   lifecycle {
@@ -52,7 +60,14 @@ resource "azurerm_storage_account" "sa" {
       queue_properties,
       share_properties,
       routing,
-      static_website,
     ]
   }
+}
+
+# Example blob container (visible change)
+resource "azurerm_storage_container" "example" {
+  count                  = var.enable_storage && var.enable_example_container ? 1 : 0
+  name                   = var.example_container_name
+  storage_account_id     = var.create_storage_account ? azurerm_storage_account.sa[0].id : data.azurerm_storage_account.existing[0].id
+  container_access_type  = var.example_container_access_type
 }

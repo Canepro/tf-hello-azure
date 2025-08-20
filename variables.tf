@@ -81,6 +81,46 @@ variable "storage_account_location" {
   default     = null
 }
 
+variable "enable_static_website" {
+  description = "Enable static website hosting on the storage account (managed only when create_storage_account=true)."
+  type        = bool
+  default     = false
+}
+
+variable "static_website_index_document" {
+  description = "Index document for static website."
+  type        = string
+  default     = "index.html"
+}
+
+variable "static_website_error_404_document" {
+  description = "404 error document for static website."
+  type        = string
+  default     = "404.html"
+}
+
+variable "enable_example_container" {
+  description = "Create an example blob container for a visible change (works with existing or newly-created SA)."
+  type        = bool
+  default     = false
+}
+
+variable "example_container_name" {
+  description = "Name of the example blob container."
+  type        = string
+  default     = "hello"
+}
+
+variable "example_container_access_type" {
+  description = "Access level for the example container (private, blob, container). Use 'private' to align with secure defaults."
+  type        = string
+  default     = "private"
+  validation {
+    condition     = contains(["private","blob","container"], var.example_container_access_type)
+    error_message = "example_container_access_type must be one of: private, blob, container."
+  }
+}
+
 variable "tags" {
   description = "Common resource tags."
   type        = map(string)
