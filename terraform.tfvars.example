@@ -4,6 +4,10 @@ storage_account_name           = "hellostorage123"
 location                       = "eastus"
 public_network_access_enabled  = true
 allow_shared_key_access        = false
+enable_storage                 = true
+create_storage_account         = true
+use_existing_resource_group    = false
+existing_resource_group_name   = ""
 
 tags = {
   project     = "tf-hello-azure"

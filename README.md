@@ -9,13 +9,13 @@
 A minimal, secure-by-default Terraform example for Azure. Provisions
 
 - An Azure Resource Group
-- A Storage Account with secure settings
+- Optionally, a Storage Account with secure settings
 
 
 ## What it creates
 
 - **Resource Group**
-- **Storage Account** with:
+- **Storage Account** (optional) with:
   - TLS 1.2 minimum
   - HTTPS-only
   - Blob public access disabled
@@ -69,6 +69,29 @@ A minimal, secure-by-default Terraform example for Azure. Provisions
 
   Visit the [Azure Portal](https://portal.azure.com/) to see your new resource group and storage account.
 
+
+## Quick lab mode (no storage, reuse existing RG)
+
+If you're in a restricted environment (e.g., Azure Cloud Shell labs) without permission to create storage accounts, you can deploy with only an existing resource group:
+
+```bash
+# Optional: temporarily disable remote backend if configured
+mv backend.tf backend.tf.disabled  # restore after the lab
+
+terraform init -reconfigure -backend=false -input=false
+
+terraform plan \
+  -var="use_existing_resource_group=true" \
+  -var="existing_resource_group_name=<your-existing-rg>" \
+  -var="enable_storage=false"
+
+terraform apply -auto-approve \
+  -var="use_existing_resource_group=true" \
+  -var="existing_resource_group_name=<your-existing-resource-group>" \
+  -var="enable_storage=false"
+```
+
+Later, when you have permissions or an existing storage account name, set `enable_storage=true` and either set `create_storage_account=false` with `storage_account_name=<existing>`, or allow creation with `create_storage_account=true`.
 
 ## Optional: Remote State
 
@@ -136,8 +159,12 @@ This repo includes a workflow that:
 
 ## Inputs
 
-- `resource_group_name` (string, required)
-- `storage_account_name` (string, required)
+- `resource_group_name` (string, required if `use_existing_resource_group` is false)
+- `use_existing_resource_group` (bool, default: false)
+- `existing_resource_group_name` (string, required if `use_existing_resource_group` is true)
+- `enable_storage` (bool, default: true) — when false, no storage resources are created or looked up
+- `create_storage_account` (bool, default: true) — only used when `enable_storage` is true
+- `storage_account_name` (string, required when `enable_storage` is true; must match ^[a-z0-9]{3,24}$)
 - `location` (string, default: eastus)
 - `public_network_access_enabled` (bool, default: true)
 - `allow_shared_key_access` (bool, default: false)
@@ -147,7 +174,7 @@ This repo includes a workflow that:
 ## Outputs
 
 - `resource_group_id`
-- `storage_account_id`
+- `storage_account_id` (may be null when `enable_storage=false`)
 
 
 ## Troubleshooting
