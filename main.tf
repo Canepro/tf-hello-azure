@@ -27,7 +27,7 @@ resource "azurerm_storage_account" "sa" {
   count                   = local.do_create_sa ? 1 : 0
   name                    = var.storage_account_name
   resource_group_name     = local.rg_name
-  location                = local.rg_location
+  location                = coalesce(var.storage_account_location, local.rg_location)
   account_tier            = "Standard"
   account_replication_type = coalesce(var.storage_account_replication_type, "LRS")
   account_kind            = "StorageV2"
@@ -44,6 +44,8 @@ resource "azurerm_storage_account" "sa" {
     ignore_changes = [
       access_tier,
       large_file_share_enabled,
+  cross_tenant_replication_enabled,
+  allow_nested_items_to_be_public,
       # provider-derived defaults or env settings
       enable_https_traffic_only,
       # nested blocks often not explicitly set here

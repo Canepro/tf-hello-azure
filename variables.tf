@@ -75,6 +75,12 @@ variable "storage_account_replication_type" {
   }
 }
 
+variable "storage_account_location" {
+  description = "Location for the storage account. When null, defaults to the resource group's location. Set this to the existing account's region after import to avoid replacement (e.g., eastus)."
+  type        = string
+  default     = null
+}
+
 variable "tags" {
   description = "Common resource tags."
   type        = map(string)
