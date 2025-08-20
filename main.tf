@@ -14,7 +14,7 @@ resource "azurerm_storage_account" "sa" {
 
   # Secure defaults
   min_tls_version               = "TLS1_2"
-  enable_https_traffic_only     = true
+  https_traffic_only_enabled    = true
   public_network_access_enabled = var.public_network_access_enabled
 
   tags = var.tags

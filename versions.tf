@@ -11,4 +11,8 @@ terraform {
 
 provider "azurerm" {
   features {}
+  # Disable automatic resource provider registration for tenants/users
+  # that do not have permission to register providers. Set to "none" to
+  # skip registration. This is useful for demo/test environments.
+  resource_provider_registrations = "none"
 }
