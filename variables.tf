@@ -50,6 +50,12 @@ variable "existing_resource_group_name" {
   }
 }
 
+variable "create_storage_account" {
+  description = "If false, skip creating the Storage Account (useful in restricted environments)."
+  type        = bool
+  default     = true
+}
+
 variable "tags" {
   description = "Common resource tags."
   type        = map(string)

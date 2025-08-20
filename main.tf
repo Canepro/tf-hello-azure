@@ -15,13 +15,20 @@ locals {
   rg_location = var.use_existing_resource_group ? data.azurerm_resource_group.existing[0].location : azurerm_resource_group.rg[0].location
 }
 
+data "azurerm_storage_account" "existing" {
+  count               = var.create_storage_account ? 0 : 1
+  name                = var.storage_account_name
+  resource_group_name = local.rg_name
+}
+
 resource "azurerm_storage_account" "sa" {
-  name                     = var.storage_account_name
-  resource_group_name      = local.rg_name
-  location                 = local.rg_location
-  account_tier             = "Standard"
+  count                   = var.create_storage_account ? 1 : 0
+  name                    = var.storage_account_name
+  resource_group_name     = local.rg_name
+  location                = local.rg_location
+  account_tier            = "Standard"
   account_replication_type = "LRS"
-  account_kind             = "StorageV2"
+  account_kind            = "StorageV2"
 
   # Secure defaults
   min_tls_version               = "TLS1_2"
