@@ -46,8 +46,7 @@ resource "azurerm_storage_account" "sa" {
       large_file_share_enabled,
   cross_tenant_replication_enabled,
   allow_nested_items_to_be_public,
-      # provider-derived defaults or env settings
-      enable_https_traffic_only,
+  # provider-derived defaults or env settings
       # nested blocks often not explicitly set here
       blob_properties,
       queue_properties,
