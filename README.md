@@ -1,66 +1,148 @@
-# tf-hello-azure
+# Terraform: Azure Hello Cloud
 
-Minimal Terraform example that creates a Resource Group and a Storage Account in Azure, with secure defaults.
+Purpose
+This repo is a minimal, secure-by-default Terraform example that provisions:
+- An Azure Resource Group
+- A Storage Account with secure settings
 
-## Prerequisites
+It’s designed as an easy starting point for learning Infrastructure as Code (IaC) on Azure with Terraform while showing good practices like version pinning, tagging, linting, and optional remote state with locking.
 
+What it creates
+- Resource Group
+- Storage Account with:
+  - TLS 1.2 minimum
+  - HTTPS-only
+  - Blob public access disabled
+  - Shared key access disabled by default (safer: use RBAC or SAS)
+
+Repo contents
+- Terraform config: main.tf, variables.tf, outputs.tf, versions.tf
+- Optional remote state: backend.tf, backend.hcl.example
+- Examples: terraform.tfvars.example
+- CI: .github/workflows/terraform.yml (optional; plan on PR, manual apply)
+- Tooling: .tflint.hcl, .terraform-docs.yml, Makefile, .gitignore
+- Docs: CONTRIBUTING.md, LICENSE
+
+Quick start (local)
+Prerequisites:
 - Terraform >= 1.5
-- An Azure subscription
-- Azure CLI logged in
+- Azure CLI
+- Logged in to Azure and selected your subscription:
+  ```bash
+  az login
+  az account set --subscription "<SUBSCRIPTION_ID_OR_NAME>"
+  ```
 
+Steps:
+1) Clone and enter the repo
+   ```bash
+   git clone <your-repo-url>
+   cd <your-repo-folder>
+   ```
+
+2) Set variables (optional)
+   ```bash
+   cp terraform.tfvars.example terraform.tfvars
+   # Edit terraform.tfvars to update names, location, and tags
+   ```
+
+3) Initialize and plan
+   ```bash
+   terraform init
+   terraform plan
+   ```
+
+4) Apply
+   ```bash
+   terraform apply -auto-approve
+   ```
+
+You can now see your resources in the Azure Portal.
+
+Optional: Remote state with Azure Storage (recommended for teams)
+Remote state stores Terraform state in an Azure Storage Account and enables locking to avoid team conflicts.
+
+A) Create a state resource group, storage account, and container (one time per environment)
 ```bash
-az login
-az account set --subscription "<SUBSCRIPTION_ID_OR_NAME>"
+az group create -n rg-tfstate -l eastus
+
+az storage account create \
+  -n <unique_sa_name> -g rg-tfstate -l eastus \
+  --sku Standard_LRS --kind StorageV2 \
+  --min-tls-version TLS1_2 --https-only true \
+  --allow-blob-public-access false
+
+az storage container create \
+  --name tfstate \
+  --account-name <unique_sa_name> \
+  --auth-mode login
 ```
 
-## Usage
-
-Initialize and plan:
-
+B) Fill the backend config (do not commit secrets)
 ```bash
-terraform init
-terraform plan -var="resource_group_name=rg-hello" -var="storage_account_name=hellostorage123" -var="location=eastus"
+cp backend.hcl.example backend.hcl
+# Edit backend.hcl and set:
+# resource_group_name  = "rg-tfstate"
+# storage_account_name = "<unique_sa_name>"
+# container_name       = "tfstate"
+# key                  = "global.tfstate"
 ```
 
-Apply:
-
+C) Re-init using backend config
 ```bash
-terraform apply -auto-approve   -var="resource_group_name=rg-hello"   -var="storage_account_name=hellostorage123"   -var="location=eastus"
+terraform init -reconfigure -backend-config=backend.hcl
 ```
 
-> **Note:** Storage account names must be 3–24 characters, unique across Azure, and only lowercase letters and digits.
+From now on, Terraform uses remote state with locking.
 
-## Inputs
+GitHub Actions CI (optional)
+This repo includes a workflow that:
+- On pull requests: runs fmt, tflint, init, validate, and plan
+- On manual dispatch: applies changes safely (after manual approval)
 
-- `resource_group_name` (string, required)
-- `storage_account_name` (string, required)
-- `location` (string, default: `eastus`)
-- `tags` (map(string), default includes `project` and `owner`)
+Before enabling, add these GitHub repository secrets:
+- AZURE_CREDENTIALS: JSON output from:
+  ```bash
+  az ad sp create-for-rbac --name "tf-gha" --role Contributor \
+    --scopes /subscriptions/<SUBSCRIPTION_ID> \
+    --sdk-auth
+  ```
+- TF_STATE_RG: Resource group for state (e.g., rg-tfstate)
+- TF_STATE_STORAGE_ACCOUNT: Storage account (e.g., <unique_sa_name>)
+- TF_STATE_CONTAINER: Container (e.g., tfstate)
+- TF_STATE_KEY: State key (e.g., global.tfstate)
 
-## Outputs
+Inputs (variables)
+- resource_group_name (string, required): Name for the Resource Group
+- storage_account_name (string, required): 3–24 lowercase letters/digits; must be globally unique
+- location (string, default: eastus): Azure region (e.g., eastus, westeurope)
+- public_network_access_enabled (bool, default: true): Set to false if you plan to use Private Endpoints
+- allow_shared_key_access (bool, default: false): Disable shared key access for better security
+- tags (map(string)): Common tags applied to all resources
 
-- `resource_group_id`
-- `storage_account_id`
+Outputs
+- resource_group_id
+- storage_account_id
 
-## Secure Defaults
+Security defaults in this example
+- TLS 1.2 minimum for Storage Account
+- HTTPS-only enforced
+- Blob public access disabled
+- Shared key access disabled by default
 
-This example pins the provider version and sets explicit secure configuration on the Storage Account:
+Tips and next steps
+- Commit the lock file after first init:
+  ```bash
+  git add .terraform.lock.hcl
+  git commit -m "chore: lock provider checksums"
+  ```
+- Use Azure Verified Modules (AVM) as you scale
+- Consider adding a Key Vault module and least-privilege RBAC for production
 
-- `min_tls_version = "TLS1_2"`
-- `https_traffic_only_enabled = true`
-- `allow_blob_public_access = false`
+Troubleshooting
+- storage_account_name must be unique and match ^[a-z0-9]{3,24}$
+- If you disable public_network_access and don’t use private endpoints, data-plane access may fail
+- If plan/apply fails in CI, verify AZURE_CREDENTIALS and TF_STATE_* secrets
 
-## CI & Linting
-
-This repo includes a GitHub Actions workflow that runs `terraform fmt`, `init`, and `validate`.
-It also includes a basic `.tflint.hcl` and `.terraform-docs.yml` to generate inputs/outputs table (optional).
-
-### Generate docs (optional)
-
-```bash
-terraform-docs markdown table . > README.md
-```
-
-## Next steps
-
-- Try the same pattern using Azure Verified Modules (AVM) for larger, production-grade examples.
+License
+MIT

@@ -22,11 +22,24 @@ variable "storage_account_name" {
   }
 }
 
+variable "public_network_access_enabled" {
+  description = "Controls public network access to the Storage Account. For stricter security, set this to false and use Private Endpoints."
+  type        = bool
+  default     = true
+}
+
+variable "allow_shared_key_access" {
+  description = "Whether to allow Shared Key access to the Storage Account. For better security, keep this false and use RBAC/SAS."
+  type        = bool
+  default     = false
+}
+
 variable "tags" {
   description = "Common resource tags."
   type        = map(string)
-  default     = {
-    project = "tf-hello-azure"
-    owner   = "example"
+  default = {
+    project     = "tf-hello-azure"
+    owner       = "example"
+    environment = "dev"
   }
 }

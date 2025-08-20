@@ -1,20 +1,24 @@
 ## Summary
 
-This PR makes the example more reproducible and secure-by-default, and adds basic CI.
+This PR makes the example more secure-by-default, easier for beginners, and ready for team use with optional remote state and a simple CI workflow.
 
 ### Key changes
-- Add `versions.tf` with Terraform and `azurerm` provider pinning
-- Harden `azurerm_storage_account` (TLS 1.2, HTTPS-only, no public blob access)
-- Add input validations and common `tags`
-- Output stable resource IDs
-- Fix/clarify README (encoding artifacts, usage examples, name rules)
-- Add GitHub Actions workflow for `fmt/init/validate`
-- Add TFLint config and terraform-docs config (optional)
+- Newbie-friendly README with step-by-step local usage and optional remote state (Azure Storage backend with locking)
+- Secure defaults on the Storage Account (TLS 1.2, HTTPS-only, blob public access disabled, shared key disabled by default)
+- Provider and Terraform version pinning
+- Basic CI workflow: fmt, tflint, init, validate, plan on PR; manual apply via workflow_dispatch
+- Tooling config: TFLint rules for Azure, terraform-docs config, Makefile helpers
+- Examples: backend.hcl.example and terraform.tfvars.example
+- .gitignore hardened for Terraform artifacts
+
+### CI prerequisites
+Add the following GitHub repository secrets to enable CI and remote state initialization:
+- AZURE_CREDENTIALS (from `az ad sp create-for-rbac ... --sdk-auth`)
+- TF_STATE_RG
+- TF_STATE_STORAGE_ACCOUNT
+- TF_STATE_CONTAINER
+- TF_STATE_KEY
 
 ### Notes
-- After merging, run `terraform init` locally and commit the generated `.terraform.lock.hcl` to lock provider checksums.
-- If you prefer Private Endpoints, set `public_network_access_enabled = false` and extend the example accordingly.
-
----
-
-Happy to tweak anything you’d like (location defaults, CI scope, etc.).
+- After the first `terraform init` locally, commit `.terraform.lock.hcl` to lock provider checksums.
+- If you set `public_network_access_enabled = false`, plan to use Private Endpoints for data-plane access.

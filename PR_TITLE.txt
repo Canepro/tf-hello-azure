@@ -1,1 +1,1 @@
-Secure defaults, version pinning, and CI for tf-hello-azure
+feat: secure defaults, remote state scaffolding, and CI

@@ -1,0 +1,5 @@
+# Copy this file to backend.hcl and fill the values. Do NOT commit backend.hcl.
+resource_group_name  = "rg-tfstate"
+storage_account_name = "mystatetfstorage123"
+container_name       = "tfstate"
+key                  = "global.tfstate"
