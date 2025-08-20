@@ -34,6 +34,22 @@ variable "allow_shared_key_access" {
   default     = false
 }
 
+variable "use_existing_resource_group" {
+  description = "If true, use an existing Azure Resource Group instead of creating a new one."
+  type        = bool
+  default     = false
+}
+
+variable "existing_resource_group_name" {
+  description = "Name of the existing Resource Group to use when use_existing_resource_group is true."
+  type        = string
+  default     = ""
+  validation {
+    condition     = var.use_existing_resource_group ? length(var.existing_resource_group_name) > 0 : true
+    error_message = "existing_resource_group_name must be provided when use_existing_resource_group is true."
+  }
+}
+
 variable "tags" {
   description = "Common resource tags."
   type        = map(string)
